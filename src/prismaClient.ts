@@ -84,9 +84,14 @@ export async function createServerState(
  * @param endTime 结束时间（Date 或时间戳，默认现在）
  * @returns [{ serverId, netInTransfer, netOutTransfer }]
  */
-export async function getServerTrafficSummary(startTime?: Date | number, endTime?: Date | number) {
+export async function getServerTrafficSummary(
+  startTime?: Date | number,
+  endTime?: Date | number
+) {
   const end = endTime ? new Date(endTime) : new Date();
-  const start = startTime ? new Date(startTime) : new Date(end.getTime() - 24 * 60 * 60 * 1000);
+  const start = startTime
+    ? new Date(startTime)
+    : new Date(end.getTime() - 24 * 60 * 60 * 1000);
 
   // 查询时间段内所有 serverId 的最早和最晚采样点
   const states = await prisma.serverState.findMany({
@@ -96,10 +101,7 @@ export async function getServerTrafficSummary(startTime?: Date | number, endTime
         lte: end,
       },
     },
-    orderBy: [
-      { serverId: 'asc' },
-      { timestamp: 'asc' },
-    ],
+    orderBy: [{ serverId: "asc" }, { timestamp: "asc" }],
     select: {
       serverId: true,
       timestamp: true,
@@ -119,13 +121,26 @@ export async function getServerTrafficSummary(startTime?: Date | number, endTime
   }
 
   // 计算每台服务器的流量变化量
-  const result = Array.from(map.entries()).map(([serverId, { first, last }]) => ({
-    serverId,
-    netInTransfer: (last.netInTransfer ?? 0) - (first.netInTransfer ?? 0),
-    netOutTransfer: (last.netOutTransfer ?? 0) - (first.netOutTransfer ?? 0),
-  }));
+  const result = Array.from(map.entries()).map(
+    ([serverId, { first, last }]) => ({
+      serverId,
+      netInTransfer: (
+        (last.netInTransfer ?? 0) - (first.netInTransfer ?? 0)
+      ).toString(),
+      netOutTransfer: (
+        (last.netOutTransfer ?? 0) - (first.netOutTransfer ?? 0)
+      ).toString(),
+    })
+  );
 
   return result;
 }
 
-
+/**
+ * 获取服务器列表
+ */
+export async function getServerList() {
+  return prisma.server.findMany({
+    orderBy: { id: "asc" },
+  });
+}
