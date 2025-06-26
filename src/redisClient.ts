@@ -1,5 +1,6 @@
 import { Redis } from "ioredis";
 import dotenv from "dotenv";
+import { ServerDatas } from "../types/ServerData";
 dotenv.config();
 
 const redis = new Redis({
@@ -19,13 +20,13 @@ export async function saveMessage(row: any) {
   try {
     await redis.zadd(REDIS_KEY, row.now, JSON.stringify(row));
     await redis.zremrangebyrank(REDIS_KEY, 0, -MAX_COUNT - 1);
-    console.log(`消息已存入 Redis ZSET，并只保留最近${MAX_COUNT}条`);
+    console.log(`[REDIS 入库]${row.now} 消息已存入 Redis,MAX:${MAX_COUNT}条`);
   } catch (err) {
     console.error("存入 Redis ZSET 失败：", err);
   }
 }
 
-export async function getLatestMessage() {
+export async function getLatestMessage(): Promise<ServerDatas | null> {
   const result = await redis.zrevrange(REDIS_KEY, 0, 0);
   return result[0] ? JSON.parse(result[0]) : null;
 }

@@ -1,6 +1,9 @@
 import { WebSocket } from "ws";
 import dotenv from "dotenv";
 import { getLatestMessage, saveMessage } from "./redisClient";
+import schedule from "node-schedule";
+import { createServerState, upsertServer } from "./prismaClient";
+
 dotenv.config();
 
 const ws = new WebSocket(process.env.WS_URL || "");
@@ -23,4 +26,11 @@ ws.on("error", function (error) {
   console.log(error);
 });
 
-
+schedule.scheduleJob(process.env.SCHEDULE_TIME || "*/10 * * * * *", async () => {
+  const latestMessage = await getLatestMessage();
+  latestMessage?.servers.map(async (server) => {
+    await upsertServer(server);
+    await createServerState(server.id, server.state, latestMessage.now);
+  });
+  console.log("[MYSQL 入库] 完成");
+});
