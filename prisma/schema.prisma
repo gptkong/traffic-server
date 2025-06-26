@@ -1,0 +1,67 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Server {
+  id           Int      @id @default(autoincrement())
+  serverId     Int      @unique // Original server ID from Nezha
+  name         String
+  countryCode  String?
+  platform     String?
+  cpu          String?
+  memTotal     BigInt?
+  diskTotal    BigInt?
+  arch         String?
+  virtualization String?
+  bootTime     BigInt?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  serverStates ServerState[]
+}
+
+model ServerState {
+  id              Int      @id @default(autoincrement())
+  serverId        Int
+  timestamp       DateTime @default(now())
+  
+  // CPU and Memory
+  cpu             Float?
+  memUsed         BigInt?
+  swapUsed        BigInt?
+  
+  // Disk
+  diskUsed        BigInt?
+  
+  // Network
+  netInTransfer   BigInt?
+  netOutTransfer  BigInt?
+  netInSpeed      Int?
+  netOutSpeed     Int?
+  
+  // System
+  uptime          BigInt?
+  load1           Float?
+  load5           Float?
+  load15          Float?
+  
+  // Connections
+  tcpConnCount    Int?
+  udpConnCount    Int?
+  processCount    Int?
+  
+  // Relations
+  server          Server   @relation(fields: [serverId], references: [serverId], onDelete: Cascade)
+
+  @@index([serverId, timestamp])
+  @@index([timestamp])
+} 
