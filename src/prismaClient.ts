@@ -77,3 +77,55 @@ export async function createServerState(
     throw error;
   }
 }
+
+/**
+ * 查询指定时间段内各个服务器的上传/下载流量变化量，默认查询24小时内
+ * @param startTime 开始时间（Date 或时间戳，默认24小时前）
+ * @param endTime 结束时间（Date 或时间戳，默认现在）
+ * @returns [{ serverId, netInTransfer, netOutTransfer }]
+ */
+export async function getServerTrafficSummary(startTime?: Date | number, endTime?: Date | number) {
+  const end = endTime ? new Date(endTime) : new Date();
+  const start = startTime ? new Date(startTime) : new Date(end.getTime() - 24 * 60 * 60 * 1000);
+
+  // 查询时间段内所有 serverId 的最早和最晚采样点
+  const states = await prisma.serverState.findMany({
+    where: {
+      timestamp: {
+        gte: start,
+        lte: end,
+      },
+    },
+    orderBy: [
+      { serverId: 'asc' },
+      { timestamp: 'asc' },
+    ],
+    select: {
+      serverId: true,
+      timestamp: true,
+      netInTransfer: true,
+      netOutTransfer: true,
+    },
+  });
+
+  // 按 serverId 分组，取每组的第一个和最后一个
+  const map = new Map<number, { first: any; last: any }>();
+  for (const s of states) {
+    if (!map.has(s.serverId)) {
+      map.set(s.serverId, { first: s, last: s });
+    } else {
+      map.get(s.serverId)!.last = s;
+    }
+  }
+
+  // 计算每台服务器的流量变化量
+  const result = Array.from(map.entries()).map(([serverId, { first, last }]) => ({
+    serverId,
+    netInTransfer: (last.netInTransfer ?? 0) - (first.netInTransfer ?? 0),
+    netOutTransfer: (last.netOutTransfer ?? 0) - (first.netOutTransfer ?? 0),
+  }));
+
+  return result;
+}
+
+
