@@ -1,31 +1,116 @@
-# Node.js + TypeScript 项目模板
+# API 接口文档
 
-## 快速开始
+## 基本信息
 
-1. 安装依赖：
-   ```bash
-   npm install
-   ```
-2. 运行项目：
-   ```bash
-   npm start
-   ```
-3. 构建项目：
-   ```bash
-   npm run build
-   ```
+- 服务端口：`API_PORT`（默认 3000）
+- 所有接口均返回 JSON 格式数据
 
-## 目录结构
+---
+
+## 1. 服务状态检查
+
+- **接口地址**：`GET /status`
+- **描述**：检查 API 服务是否运行中
+- **请求参数**：无
+- **响应示例**：
 
 ```
-├── src
-│   └── index.ts
-├── package.json
-├── tsconfig.json
-└── README.md
+{
+  "status": "ok",
+  "message": "API服务运行中"
+}
 ```
 
-## 说明
-- 使用 TypeScript 编写 Node.js 应用。
-- 入口文件为 `src/index.ts`。
-- 使用 `ts-node` 直接运行 TypeScript 代码。 
+---
+
+## 2. 查询各服务器流量统计
+
+- **接口地址**：`GET /api/traffic-summary`
+- **描述**：查询指定时间段内各服务器的上传/下载流量变化量，默认查询24小时内
+- **请求参数**：
+  - `startTime`（可选，时间戳，毫秒）：起始时间
+  - `endTime`（可选，时间戳，毫秒）：结束时间
+- **响应示例**：
+```
+{
+  "code": 0,
+  "data": [
+    {
+      "serverId": 1,
+      "netInTransfer": "123456789",
+      "netOutTransfer": "987654321"
+    }
+  ]
+}
+```
+- **失败响应**：
+```
+{
+  "code": 1,
+  "message": "查询失败",
+  "error": "错误信息"
+}
+```
+
+---
+
+## 3. 获取服务器列表
+
+- **接口地址**：`GET /api/server-list`
+- **描述**：获取所有服务器的基本信息
+- **请求参数**：无
+- **响应示例**：
+```
+{
+  "code": 0,
+  "data": [
+    {
+      "id": 1,
+      "serverId": 1,
+      "name": "服务器A",
+      "countryCode": "CN",
+      "platform": "linux",
+      "cpu": "Intel Xeon",
+      "memTotal": "16777216",
+      "diskTotal": "107374182400",
+      "arch": "x86_64",
+      "virtualization": "kvm",
+      "bootTime": "1719400000000",
+      "createdAt": "2025-06-26T08:00:00.000Z",
+      "updatedAt": "2025-06-26T08:00:00.000Z"
+    }
+  ]
+}
+```
+- **失败响应**：
+```
+{
+  "code": 1,
+  "message": "查询失败",
+  "error": "错误信息"
+}
+```
+
+---
+
+## 4. 数据模型说明
+
+### 服务器（Server）
+- `id`：主键，自增
+- `serverId`：原始服务器ID
+- `name`：服务器名称
+- `countryCode`：国家/地区代码
+- `platform`：操作系统平台
+- `cpu`：CPU信息
+- `memTotal`：总内存（字节）
+- `diskTotal`：总磁盘（字节）
+- `arch`：架构
+- `virtualization`：虚拟化类型
+- `bootTime`：开机时间（时间戳，毫秒）
+- `createdAt`：创建时间
+- `updatedAt`：更新时间
+
+### 服务器流量统计（Traffic Summary）
+- `serverId`：服务器ID
+- `netInTransfer`：上传流量变化量（字节）
+- `netOutTransfer`：下载流量变化量（字节）
