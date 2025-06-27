@@ -1,8 +1,16 @@
+version: "3.8"
 services:
-  app:
+  index:
     build: .
-    container_name: traffic-demo1-app
+    container_name: traffic-server-store
+    command: sh -c "npm start"
+    volumes:
+      - ./.env:/app/.env
+  api:
+    build: .
+    container_name: traffic-server-api
+    command: sh -c "npm run api"
     ports:
       - "3012:3000"
     volumes:
-      - ./.env:/app/.env 
+      - ./.env:/app/.env
