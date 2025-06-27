@@ -88,10 +88,13 @@ export async function getServerTrafficSummary(
   startTime?: Date | number,
   endTime?: Date | number
 ) {
+  const queryStartTime = Date.now();
   const end = endTime ? new Date(endTime) : new Date();
   const start = startTime
     ? new Date(startTime)
     : new Date(end.getTime() - 24 * 60 * 60 * 1000);
+
+  console.log(`[Prisma查询] 开始查询时间段: ${start.toISOString()} 到 ${end.toISOString()}`);
 
   // 查询时间段内所有 serverId 的最早和最晚采样点
   const states = await prisma.serverState.findMany({
@@ -109,6 +112,10 @@ export async function getServerTrafficSummary(
       netOutTransfer: true,
     },
   });
+
+  const queryEndTime = Date.now();
+  const queryDuration = queryEndTime - queryStartTime;
+  console.log(`[Prisma查询] 数据库查询耗时: ${queryDuration}ms, 返回记录数: ${states.length}`);
 
   // 按 serverId 分组，取每组的第一个和最后一个
   const map = new Map<number, { first: any; last: any }>();
@@ -133,6 +140,10 @@ export async function getServerTrafficSummary(
     })
   );
 
+  const totalEndTime = Date.now();
+  const totalDuration = totalEndTime - queryStartTime;
+  console.log(`[Prisma查询] 总处理耗时: ${totalDuration}ms, 返回服务器数: ${result.length}`);
+
   return result;
 }
 
@@ -140,37 +151,73 @@ export async function getServerTrafficSummary(
  * 获取服务器列表
  */
 export async function getServerList() {
-  return prisma.server.findMany({
+  const startTime = Date.now();
+  console.log("[Prisma查询] 开始查询服务器列表");
+  
+  const result = await prisma.server.findMany({
     orderBy: { id: "asc" },
   });
+
+  const endTime = Date.now();
+  const duration = endTime - startTime;
+  console.log(`[Prisma查询] 服务器列表查询耗时: ${duration}ms, 返回服务器数: ${result.length}`);
+  
+  return result;
 }
 
 /**
  * 查询24小时内的流量统计
  */
 export async function get24HourTrafficSummary() {
+  const startTime = Date.now();
+  console.log("[Prisma查询] 开始查询24小时流量统计");
+  
   const end = new Date();
   const start = new Date(end.getTime() - 24 * 60 * 60 * 1000);
   
-  return await getServerTrafficSummary(start, end);
+  const result = await getServerTrafficSummary(start, end);
+  
+  const endTime = Date.now();
+  const duration = endTime - startTime;
+  console.log(`[Prisma查询] 24小时流量统计总耗时: ${duration}ms`);
+  
+  return result;
 }
 
 /**
  * 查询7天内的流量统计
  */
 export async function get7DayTrafficSummary() {
+  const startTime = Date.now();
+  console.log("[Prisma查询] 开始查询7天流量统计");
+  
   const end = new Date();
   const start = new Date(end.getTime() - 7 * 24 * 60 * 60 * 1000);
   
-  return await getServerTrafficSummary(start, end);
+  const result = await getServerTrafficSummary(start, end);
+  
+  const endTime = Date.now();
+  const duration = endTime - startTime;
+  console.log(`[Prisma查询] 7天流量统计总耗时: ${duration}ms`);
+  
+  return result;
 }
 
 /**
  * 查询一个月内的流量统计（30天）
  */
 export async function get30DayTrafficSummary() {
+  const startTime = Date.now();
+  console.log("[Prisma查询] 开始查询30天流量统计");
+  
   const end = new Date();
   const start = new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000);
   
-  return await getServerTrafficSummary(start, end);
+  const result = await getServerTrafficSummary(start, end);
+  
+  const endTime = Date.now();
+  const duration = endTime - startTime;
+  console.log(`[Prisma查询] 30天流量统计总耗时: ${duration}ms`);
+  
+  return result;
 }
