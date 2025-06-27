@@ -3,6 +3,6 @@ services:
     build: .
     container_name: traffic-demo1-app
     ports:
-      - "3000:3000"
+      - "3012:3000"
     volumes:
       - ./.env:/app/.env 
