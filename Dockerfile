@@ -9,6 +9,8 @@ COPY . .
 
 # 安装依赖
 RUN npm install
+# 安装pm2
+RUN npm install -g pm2
 
 # 生成 Prisma Client
 RUN npx prisma generate
@@ -16,5 +18,5 @@ RUN npx prisma generate
 # 暴露端口（如有需要，可根据实际情况调整）
 EXPOSE 3000
 
-# 并行运行 npm start 和 npm run api
-CMD ["sh", "-c", "npm start & npm run api"] 
+# 默认命令留空，由docker-compose指定
+CMD ["pm2-runtime"] 

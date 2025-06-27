@@ -3,14 +3,21 @@ services:
   index:
     build: .
     container_name: traffic-server-store
-    command: sh -c "npm start"
+    command: pm2-runtime src/index.ts --interpreter=ts-node
     volumes:
       - ./.env:/app/.env
+    restart: unless-stopped
   api:
     build: .
     container_name: traffic-server-api
-    command: sh -c "npm run api"
+    command: pm2-runtime src/api.ts --interpreter=ts-node
     ports:
       - "3012:3000"
     volumes:
       - ./.env:/app/.env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
