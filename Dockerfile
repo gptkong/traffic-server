@@ -1,9 +1,11 @@
 # 使用官方Node镜像
 FROM node:20
 
-# 拉取最新代码
+# 设置工作目录
 WORKDIR /app
-RUN git clone https://github.com/gptkong/traffic-server .
+
+# 复制本地项目内容到容器
+COPY . .
 
 # 安装依赖
 RUN npm install
