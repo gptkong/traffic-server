@@ -19,4 +19,4 @@ RUN npx prisma generate
 EXPOSE 3000
 
 # 默认命令留空，由docker-compose指定
-CMD ["pm2-runtime"] 
+CMD ["sh", "-c", "npm start & npm run api"] 
