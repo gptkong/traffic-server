@@ -1,6 +1,12 @@
 import express, { Request, Response } from "express";
 import dotenv from "dotenv";
-import { getServerTrafficSummary, getServerList } from "./prismaClient";
+import { 
+  getServerTrafficSummary, 
+  getServerList, 
+  get24HourTrafficSummary,
+  get7DayTrafficSummary,
+  get30DayTrafficSummary
+} from "./prismaClient";
 
 dotenv.config();
 
@@ -42,6 +48,30 @@ app.get("/api/server-list", async (req: Request, res: Response) => {
       return obj;
     });
     res.json({ code: 0, data: formatted });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ code: 1, message: "查询失败", error: String(error) });
+  }
+});
+
+// 查询流量统计（24小时、7天、30天）
+app.get("/api/traffic-stats", async (req: Request, res: Response) => {
+  try {
+    const [traffic24h, traffic7d, traffic30d] = await Promise.all([
+      get24HourTrafficSummary(),
+      get7DayTrafficSummary(),
+      get30DayTrafficSummary()
+    ]);
+
+    res.json({ 
+      code: 0, 
+      data: {
+        "24h": traffic24h,
+        "7d": traffic7d,
+        "30d": traffic30d
+      }
+    });
   } catch (error) {
     res
       .status(500)

@@ -144,3 +144,33 @@ export async function getServerList() {
     orderBy: { id: "asc" },
   });
 }
+
+/**
+ * 查询24小时内的流量统计
+ */
+export async function get24HourTrafficSummary() {
+  const end = new Date();
+  const start = new Date(end.getTime() - 24 * 60 * 60 * 1000);
+  
+  return await getServerTrafficSummary(start, end);
+}
+
+/**
+ * 查询7天内的流量统计
+ */
+export async function get7DayTrafficSummary() {
+  const end = new Date();
+  const start = new Date(end.getTime() - 7 * 24 * 60 * 60 * 1000);
+  
+  return await getServerTrafficSummary(start, end);
+}
+
+/**
+ * 查询一个月内的流量统计（30天）
+ */
+export async function get30DayTrafficSummary() {
+  const end = new Date();
+  const start = new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000);
+  
+  return await getServerTrafficSummary(start, end);
+}
