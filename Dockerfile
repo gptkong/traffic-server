@@ -9,8 +9,8 @@ COPY . .
 
 # 安装依赖（包括 devDependencies）
 RUN npm install --include=dev
-# 安装pm2
-RUN npm install -g pm2
+# 全局安装 pm2 和 ts-node
+RUN npm install -g pm2 ts-node
 
 # 生成 Prisma Client
 RUN npx prisma generate
