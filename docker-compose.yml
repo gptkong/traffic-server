@@ -1,16 +1,9 @@
 services:
-  index:
+  traffic-server:
     build: .
-    container_name: traffic-server-store
-    command: sh -c "npm start"
-    volumes:
-      - ./.env:/app/.env
-    restart: always
-  api:
-    build: .
-    container_name: traffic-server-api
-    command: sh -c "npm run api"
+    container_name: traffic-server
     ports:
       - "3012:3000"
     volumes:
       - ./.env:/app/.env
+    restart: always
